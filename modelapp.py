@@ -52,6 +52,29 @@ selected_soil_type = st.selectbox('Soil Type', soil_types)
 selected_state_name = st.selectbox('State Name', state_names)
 selected_dist_name = st.selectbox('District Name', dist_names)
 
-if st.button('Predict Maize Yield'):
-    # Create input dictionary with all features initialized to 0
-    input_data = {col: 0 for col in features
+if st.button('Predict Maize Yield'): # Create input dictionary with all features initialized to 0
+    input_data = {col: 0 for col in features}
+    
+    # Set numerical features
+    input_data['Year'] = year
+    input_data['AVERAGE TEMPERATURE (Centigrate)'] = avg_temp
+    input_data['NITROGEN PER HA OF GCA (Kg per ha)'] = nitrogen
+    input_data['PHOSPHATE PER HA OF GCA (Kg per ha)'] = phosphate
+    input_data['POTASH PER HA OF GCA (Kg per ha)'] = potash
+    input_data['AVERAGE RAINFALL (Millimeters)'] = rainfall
+    input_data['AVERAGE PERCIPITATION (Millimeters)'] = precipitation
+    
+    # Set categorical features (one-hot encoded)
+    input_data[f'SOIL TYPE PERCENT1 (Percent)_{selected_soil_type}'] = 1
+    input_data[f'State Name_{selected_state_name}'] = 1  
+    input_data[f'Dist Name_{selected_dist_name}'] = 1
+    
+    # Create DataFrame ensuring correct column order
+    input_df = pd.DataFrame([input_data])[features]
+    
+    try:
+        prediction = loaded_model.predict(input_df)
+        st.success(f'The predicted maize yield is: **{prediction[0]:.2f} Kg per ha**')
+    except Exception as e:
+        st.error(f"Prediction error: {str(e)}")
+        st.write("Input DataFrame columns:", input_df.columns.tolist())
